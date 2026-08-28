@@ -1,0 +1,125 @@
+/* ==========================================================================
+   VSM Simulator — theme tokens
+   Base palette matches the TimeStudy app exactly (Light theme below).
+   Warm and Dark are derived, keeping status colors identical across themes.
+   ========================================================================== */
+
+:root {
+  /* ---- fonts ---- */
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* ---- radii / spacing (shared across themes) ---- */
+  --radius-card: 16px;
+  --radius-btn-lg: 14px;
+  --radius-btn-sm: 10px;
+  --card-padding: 20px;
+  --card-gap: 14px;
+
+  /* ---- brand ---- */
+  --brand: #2563EB;
+  --brand-light-bg: #EFF6FF;
+  --brand-light-border: #BFDBFE;
+
+  /* ---- status: identical in every theme ---- */
+  --status-green: #10B981;
+  --status-amber: #F59E0B;
+  --status-red: #EF4444;
+  --status-red-bg: #FEF2F2;
+  --status-red-border: #FECACA;
+
+  /* ---- chart / tag accents: identical in every theme ---- */
+  --accent-cobalt: #F59E0B;
+  --accent-purple: #A855F7;
+  --accent-sky: #0EA5E9;
+  --accent-slate: #64748B;
+  --accent-gray: #CBD5E1;
+}
+
+/* ============================= LIGHT (= TimeStudy) ============================= */
+[data-theme='light'] {
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --border-card: #E2E8F0;
+  --text-primary: #1E293B;
+  --text-heading: #0F172A;
+  --text-muted: #64748B;
+  --text-placeholder: #94A3B8;
+  --grid-line: #E2E8F0;
+  --row-alt-bg: #F1F5F9;
+  --input-bg: #F8FAFC;
+  --input-border: #CBD5E1;
+  --overlay: rgba(15, 23, 42, 0.5);
+}
+
+/* ============================= WARM ============================= */
+[data-theme='warm'] {
+  --bg-page: #FAF7F2;
+  --bg-card: #FFFEFB;
+  --border-card: #E7E0D5;
+  --text-primary: #2B2118;
+  --text-heading: #2B2118;
+  --text-muted: #5B4A3A;
+  --text-placeholder: #9B8A79;
+  --grid-line: #E7E0D5;
+  --row-alt-bg: #F2EDE5;
+  --input-bg: #F5F0E8;
+  --input-border: #D5C9B8;
+  --overlay: rgba(43, 33, 24, 0.5);
+  --brand: #6D5ACF;
+  --brand-light-bg: #F2EDE5;
+  --brand-light-border: #8B76E8;
+}
+
+/* ============================= DARK ============================= */
+[data-theme='dark'] {
+  --bg-page: #0F172A;
+  --bg-card: #1E293B;
+  --border-card: #334155;
+  --text-primary: #E2E8F0;
+  --text-heading: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-placeholder: #64748B;
+  --grid-line: #334155;
+  --row-alt-bg: #263449;
+  --input-bg: #0F172A;
+  --input-border: #334155;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --brand: #60A5FA;
+  --brand-light-bg: #1E3A5F;
+  --brand-light-border: #2563EB;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button, input, select {
+  font-family: var(--font-ui);
+  touch-action: manipulation;
+}
+
+button {
+  cursor: pointer;
+}
+
+::placeholder {
+  color: var(--text-placeholder);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+a { color: var(--brand); }
