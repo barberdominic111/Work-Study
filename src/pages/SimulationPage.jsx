@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { card, sectionLabel, btnPrimary, btnSecondary, btnActive, fieldLabel, inputStyle } from '../lib/styles.js';
+import { card, sectionLabel, btnPrimary, btnSecondary, btnActive, fieldLabel, inputStyle, overlay } from '../lib/styles.js';
 import { simulateValueStream } from '../lib/simulationEngine.js';
+import AnimatedFlow from '../components/AnimatedFlow.jsx';
 
 const SPEEDS = [1, 2, 4];
 
@@ -8,6 +9,7 @@ export default function SimulationPage({ vsm, setVsm, onResults }) {
   const [running, setRunning] = useState(false);
   const [speedIdx, setSpeedIdx] = useState(0);
   const [progress, setProgress] = useState(0); // 0..1 animation progress
+  const [expanded, setExpanded] = useState(false);
   const rafRef = useRef(null);
   const startRef = useRef(null);
 
@@ -94,17 +96,13 @@ export default function SimulationPage({ vsm, setVsm, onResults }) {
 
         {stages.length > 0 && (
           <div style={{ marginTop: 18 }}>
-            <AnimatedFlow stages={stages} inventories={vsm.inventories} progress={progress} />
-            <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'center' }}>
-              <button style={btnSecondary} onClick={pause}>⏸ Pause</button>
-              <button style={btnSecondary} onClick={reset}>⟲ Reset</button>
-              <button
-                style={btnSecondary}
-                onClick={() => setSpeedIdx((i) => (i + 1) % SPEEDS.length)}
-              >
-                ⏩ {SPEEDS[speedIdx]}x
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <button style={{ ...btnSecondary, padding: '6px 12px', fontSize: 12 }} onClick={() => setExpanded(true)}>
+                ⤢ Expand
               </button>
             </div>
+            <AnimatedFlow stages={stages} inventories={vsm.inventories} progress={progress} />
+            <PlaybackControls running={running} pause={pause} reset={reset} speedIdx={speedIdx} setSpeedIdx={setSpeedIdx} runSimulation={runSimulation} />
           </div>
         )}
       </div>
@@ -115,53 +113,73 @@ export default function SimulationPage({ vsm, setVsm, onResults }) {
         deterministically by the simulation engine from your process and
         inventory data, not from the animation.
       </div>
-    </div>
-  );
-}
 
-function AnimatedFlow({ stages, inventories, progress }) {
-  // Simple left-to-right dot that sweeps across process boxes as "progress" advances.
-  const n = stages.length;
-  const dotIndex = Math.min(n - 1, Math.floor(progress * n));
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', overflowX: 'auto', gap: 6, paddingBottom: 8 }}>
-      {stages.map((s, i) => (
-        <React.Fragment key={s.id}>
+      {expanded && (
+        <div style={{ ...overlay, padding: 0, alignItems: 'stretch' }}>
           <div
             style={{
-              minWidth: 84,
-              textAlign: 'center',
-              border: i === dotIndex ? '2px solid var(--brand)' : '1.5px solid var(--border-card)',
-              borderRadius: 10,
-              padding: '10px 6px',
-              background: i === dotIndex ? 'var(--brand-light-bg)' : 'var(--bg-card)',
-              fontSize: 11,
-              fontWeight: 700,
-              color: 'var(--text-primary)',
-              position: 'relative',
+              background: 'var(--bg-page)',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            {s.name}
-            {i === dotIndex && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: -6,
-                  right: -6,
-                  width: 12,
-                  height: 12,
-                  borderRadius: '50%',
-                  background: 'var(--brand)',
-                }}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '14px 16px',
+                borderBottom: '1px solid var(--border-card)',
+                background: 'var(--bg-card)',
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-heading)' }}>
+                Simulation Flow
+              </div>
+              <button style={{ ...btnSecondary, padding: '6px 14px' }} onClick={() => setExpanded(false)}>
+                ✕ Close
+              </button>
+            </div>
+            <div style={{ flex: 1, overflow: 'auto', padding: '20px 16px' }}>
+              <AnimatedFlow
+                stages={stages}
+                inventories={vsm.inventories}
+                progress={progress}
+                orientation="vertical"
+                size="large"
               />
-            )}
+            </div>
+            <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-card)', background: 'var(--bg-card)' }}>
+              <PlaybackControls running={running} pause={pause} reset={reset} speedIdx={speedIdx} setSpeedIdx={setSpeedIdx} runSimulation={runSimulation} />
+            </div>
           </div>
-          {i < inventories.length && (
-            <div style={{ fontSize: 16, color: 'var(--text-placeholder)' }}>→△→</div>
-          )}
-        </React.Fragment>
-      ))}
+        </div>
+      )}
     </div>
   );
 }
+
+function PlaybackControls({ running, pause, reset, speedIdx, setSpeedIdx, runSimulation }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, marginTop: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+      <button style={btnPrimary2} onClick={runSimulation}>▶ Run</button>
+      <button style={btnSecondary} onClick={pause}>⏸ Pause</button>
+      <button style={btnSecondary} onClick={reset}>⟲ Reset</button>
+      <button style={btnSecondary} onClick={() => setSpeedIdx((i) => (i + 1) % SPEEDS.length)}>
+        ⏩ {SPEEDS[speedIdx]}x
+      </button>
+    </div>
+  );
+}
+
+const btnPrimary2 = {
+  background: 'var(--brand)',
+  color: '#FFFFFF',
+  border: 'none',
+  borderRadius: 10,
+  padding: '10px 16px',
+  fontSize: 13,
+  fontWeight: 700,
+};
