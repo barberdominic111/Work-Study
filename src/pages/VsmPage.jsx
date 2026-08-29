@@ -5,7 +5,7 @@ import VaNvaTimeline from '../components/VaNvaTimeline.jsx';
 import ProcessEditorModal from '../components/ProcessEditorModal.jsx';
 import InventoryEditorModal from '../components/InventoryEditorModal.jsx';
 import { card, sectionLabel, btnPrimary, btnSecondary, emptyState } from '../lib/styles.js';
-import { newProcess, reconcileInventories } from '../lib/model.js';
+import { newProcess, newInventory, reconcileInventories } from '../lib/model.js';
 import { effectiveCapacityPerHour, normalizeProcess } from '../lib/simulationEngine.js';
 
 export default function VsmPage({ vsm, setVsm, results }) {
@@ -26,13 +26,47 @@ export default function VsmPage({ vsm, setVsm, results }) {
   };
 
   function addProcess() {
+    insertProcessAt(processes.length);
+  }
+
+  // Insert a brand-new process at array position `i` (0..processes.length),
+  // shifting everything at/after i to the right. Existing process names and
+  // parameters are never touched — this is how you slot a forgotten step
+  // between two you've already built without renaming anything.
+  function insertProcessAt(i) {
     const p = newProcess({ name: `Process ${processes.length + 1}` });
-    const nextProcesses = [...processes, p];
-    setVsm({
-      ...vsm,
-      processes: nextProcesses,
-      inventories: reconcileInventories(nextProcesses, inventories),
-    });
+    const nextProcesses = [...processes.slice(0, i), p, ...processes.slice(i)];
+
+    let nextInventories;
+    if (processes.length === 0) {
+      nextInventories = [];
+    } else if (i <= 0) {
+      // new process becomes the first step; add a fresh buffer ahead of the old first step
+      nextInventories = [newInventory({ name: `Inventory ${inventories.length + 1}` }), ...inventories];
+    } else if (i >= processes.length) {
+      // append at the very end
+      nextInventories = [...inventories, newInventory({ name: `Inventory ${inventories.length + 1}` })];
+    } else {
+      // inserted in the middle: the old buffer that used to connect the
+      // neighbors now connects the new step to its downstream neighbor;
+      // a fresh buffer is added upstream of the new step
+      nextInventories = [
+        ...inventories.slice(0, i - 1),
+        newInventory({ name: `Inventory ${inventories.length + 1}` }),
+        ...inventories.slice(i - 1),
+      ];
+    }
+
+    setVsm({ ...vsm, processes: nextProcesses, inventories: nextInventories });
+  }
+
+  // Reorder without touching names/params — swap two adjacent steps.
+  function moveProcess(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= processes.length) return;
+    const next = [...processes];
+    [next[index], next[target]] = [next[target], next[index]];
+    setVsm({ ...vsm, processes: next });
   }
 
   function saveProcess(form) {
@@ -77,6 +111,9 @@ export default function VsmPage({ vsm, setVsm, results }) {
             <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-placeholder)', marginBottom: 4 }}>
               SUPPLIER ↓
             </div>
+
+            <InsertLink onClick={() => insertProcessAt(0)} />
+
             {processes.map((p, i) => (
               <React.Fragment key={p.id}>
                 <ProcessBox
@@ -84,13 +121,20 @@ export default function VsmPage({ vsm, setVsm, results }) {
                   isBottleneck={i === bottleneckIdx}
                   capacityPerHour={capacities[i]}
                   onClick={() => setEditingProcess(p.id)}
+                  onMoveUp={() => moveProcess(i, -1)}
+                  onMoveDown={() => moveProcess(i, 1)}
+                  canMoveUp={i > 0}
+                  canMoveDown={i < processes.length - 1}
                 />
                 {i < inventories.length && (
-                  <InventoryTriangle
-                    inventory={inventories[i]}
-                    currentQty={invLevelFor(i)}
-                    onClick={() => setEditingInventory(inventories[i].id)}
-                  />
+                  <>
+                    <InventoryTriangle
+                      inventory={inventories[i]}
+                      currentQty={invLevelFor(i)}
+                      onClick={() => setEditingInventory(inventories[i].id)}
+                    />
+                    <InsertLink onClick={() => insertProcessAt(i + 1)} />
+                  </>
                 )}
               </React.Fragment>
             ))}
@@ -133,6 +177,26 @@ export default function VsmPage({ vsm, setVsm, results }) {
           onClose={() => setEditingInventory(null)}
         />
       )}
+    </div>
+  );
+}
+
+function InsertLink({ onClick }) {
+  return (
+    <div style={{ textAlign: 'center', margin: '2px 0' }}>
+      <button
+        onClick={onClick}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--brand)',
+          fontSize: 11,
+          fontWeight: 700,
+          padding: '2px 8px',
+        }}
+      >
+        + Insert Step Here
+      </button>
     </div>
   );
 }
