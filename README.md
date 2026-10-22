@@ -61,6 +61,17 @@ Use a **private** repository if you add MOST card images (see below).
 2. Framework Preset: **Other**. Build Command: leave empty. Output Directory: leave empty (project root).
 3. Deploy. Every push to `main` redeploys.
 
+### If Vercel says `vite: command not found` / `vite build exited with 127`
+
+This app has no build step. Vercel is running a build because the project is set to the Vite preset.
+- vercel.json in this folder now forces "no framework, no build". Push it and redeploy.
+- Also check Project > Settings > Build and Development Settings: Framework Preset = **Other**, and turn
+  off the Override for Build Command, Install Command and Output Directory (or clear them).
+- Make sure there is no package.json in the repo root with a "build": "vite build" script (for example
+  from another project in the same repo).
+- Make sure Settings > General > **Root Directory** points at the folder that contains index.html
+  (if you pushed the whole `work-study` folder inside a repo, set Root Directory to `work-study`).
+
 ## Install as an app
 
 Open the deployed URL on a phone: Share > Add to Home Screen (iOS) or Install app (Android/Chrome).
