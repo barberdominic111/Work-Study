@@ -1,6 +1,6 @@
 // Work Study service worker: offline support.
 // Bump CACHE_VERSION whenever you deploy a new index.html so installed copies refresh.
-const CACHE_VERSION = 'workstudy-v1';
+const CACHE_VERSION = 'workstudy-v2';
 const CORE = [
   './', './index.html', './manifest.webmanifest',
   './vendor/react.production.min.js', './vendor/react-dom.production.min.js', './vendor/htm.umd.js',
