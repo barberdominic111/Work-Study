@@ -14,6 +14,7 @@ work-study/
 ├── vercel.json             Vercel settings (static site, service worker headers)
 ├── .gitignore
 ├── README.md               This file
+├── EXCHANGE.md             JSON export/import contract (schemaVersion 1.0)
 ├── vendor/                 React, ReactDOM and htm (local copies so it works offline)
 │   ├── react.production.min.js
 │   ├── react-dom.production.min.js
@@ -71,6 +72,12 @@ This app has no build step. Vercel is running a build because the project is set
   from another project in the same repo).
 - Make sure Settings > General > **Root Directory** points at the folder that contains index.html
   (if you pushed the whole `work-study` folder inside a repo, set Root Directory to `work-study`).
+
+## Data exchange (Improvement Tracker, TimeStudy)
+
+Settings > Open data exchange exports processes, sequences, elements, value streams or everything as JSON
+files (save them to any folder) and imports TimeStudy studies as read-only evidence. The file format is in
+EXCHANGE.md. Work Study works on its own and needs no tracker or TimeStudy file.
 
 ## Install as an app
 
